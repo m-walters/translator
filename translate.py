@@ -18,10 +18,11 @@ def translate_pdf(src_lang: str, target_lang: str, input_path, output_path):
     writer = PdfWriter()
 
     # Page settings
+    inch = 72
     PAGE_WIDTH, PAGE_HEIGHT = A4
-    LEFT_MARGIN = 72  # 1 inch
-    RIGHT_MARGIN = 72
-    TOP_MARGIN = 800
+    LEFT_MARGIN = 12
+    RIGHT_MARGIN = inch * 2
+    TOP_MARGIN = PAGE_HEIGHT - inch
     LINE_HEIGHT = 12  # Space between lines
 
     for page in reader.pages:
