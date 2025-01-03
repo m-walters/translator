@@ -5,6 +5,7 @@ import os
 from deep_translator import GoogleTranslator
 from PyPDF2 import PdfReader, PdfWriter
 from reportlab.lib.pagesizes import A4
+from reportlab.lib.utils import simpleSplit
 from reportlab.pdfgen import canvas
 
 
@@ -16,6 +17,13 @@ def translate_pdf(src_lang: str, target_lang: str, input_path, output_path):
     reader = PdfReader(input_path)
     writer = PdfWriter()
 
+    # Page settings
+    PAGE_WIDTH, PAGE_HEIGHT = A4
+    LEFT_MARGIN = 72  # 1 inch
+    RIGHT_MARGIN = 72
+    TOP_MARGIN = 800
+    LINE_HEIGHT = 12  # Space between lines
+
     for page in reader.pages:
         # Extract the text from the page
         original_text = page.extract_text()
@@ -26,11 +34,13 @@ def translate_pdf(src_lang: str, target_lang: str, input_path, output_path):
         # Create a new blank page with translated text using ReportLab
         packet = io.BytesIO()
         can = canvas.Canvas(packet, pagesize=A4)
-        text_object = can.beginText(72, 800)  # Starting position for text
+        text_object = can.beginText(LEFT_MARGIN, TOP_MARGIN)  # Starting position for text
 
-        # Add translated text line by line
+        # Split and wrap translated text
         for line in translated_text.split("\n"):
-            text_object.textLine(line)
+            wrapped_lines = simpleSplit(line, "Helvetica", 10, PAGE_WIDTH - LEFT_MARGIN - RIGHT_MARGIN)
+            for wrapped_line in wrapped_lines:
+                text_object.textLine(wrapped_line)
 
         can.drawText(text_object)
         can.save()
@@ -53,7 +63,7 @@ def main():
     parser.add_argument('src_lang', type=str, help='source language code')
     parser.add_argument('target_lang', type=str, help='target language code')
     parser.add_argument(
-        'filenames', metavar='filenames', type=str, nargs='+',
+        'filenames', metavar='filenames', type=str, nargs='*',
         help='one or more filenames to translate'
     )
     args = parser.parse_args()
@@ -74,6 +84,10 @@ def main():
     for fname in fnames:
         # Strip the in_dir from the filename if exists
         fname = fname.split(in_dir)[-1]
+        # If file ext is not pdf, log message and skip
+        if not fname.lower().endswith(".pdf"):
+            print(f"Skipping '{fname}': not a PDF file")
+            continue
 
         # Append _en to the output file name
         outname = fname.split(".")[0] + f"_{target_lang}.pdf"
