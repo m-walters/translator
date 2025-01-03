@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "translator"
+version = "0.1.0"
+description = ""
+authors = ["Michael Walters <walters.m93@gmail.com>"]
+readme = "README.md"
+# While this is not a package/module (just dependency mgmt):
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.12"
+deep-translator = "^1.11.4"
+pypdf2 = "^3.0.1"
+reportlab = "^4.2.5"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
